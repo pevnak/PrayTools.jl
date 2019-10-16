@@ -8,6 +8,7 @@ function tgradient(loss, ps, preparesamples)
     n = Threads.nthreads()
     gs = _tgradient(loss, ps, preparesamples, n)
     for p in ps
+        isnothing(gs[p]) && continue
         gs[p] ./= n
     end
     gs 
@@ -41,7 +42,7 @@ end
     function ttrain!(loss, ps, preparesamples, opt, iterations; cb = () -> ())
 """
 function ttrain!(loss, ps, preparesamples, opt, iterations; cb = () -> ())
-  ps = Params(ps)
+  ps = Flux.Params(ps)
   for i in 1:iterations
       gs = tgradient(loss, ps, preparesamples)
       Flux.Optimise.update!(opt, ps, gs)
