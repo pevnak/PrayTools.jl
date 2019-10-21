@@ -2,3 +2,7 @@ name = "TrainTools"
 uuid = "083a1e89-a1cc-483a-bb5e-ca7e64a602e0"
 authors = ["Pevnak <pevnak@gmail.com>"]
 version = "0.1.0"
+
+[deps]
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+
