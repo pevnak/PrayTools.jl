@@ -2,6 +2,6 @@ module TrainTools
 
 include("threadedgrad.jl")
 
-export tgradient, ttrain!
+export tgradient, ttrain!, ptrain!
 
 end # module
