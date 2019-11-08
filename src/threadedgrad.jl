@@ -50,3 +50,37 @@ function ttrain!(loss, ps, preparesamples, opt, iterations; cb = () -> ())
       cb()
   end
 end
+
+
+function pgradient(loss, ps, samples::Tuple) 
+    gs = _pgradient(loss, ps, samples)
+    for p in ps
+        isnothing(gs[p]) && continue
+        gs[p] ./= length(samples)
+    end
+    gs 
+end
+
+function _pgradient(loss, ps, samples)
+    if length(samples) == 1
+        x = samples[1]
+        return(gradient(() -> loss(x...), ps))
+    else 
+        i = div(length(samples),2)
+        ref1 = Threads.@spawn _pgradient(loss, ps, samples[1:i])
+        ref2 = Threads.@spawn _pgradient(loss, ps, samples[i+1:end])
+        return(addgrad!(fetch(ref1), fetch(ref2), ps))
+    end
+end
+
+"""
+    function ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> ())
+"""
+function ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> ())
+  ps = Flux.Params(ps)
+  for i in 1:iterations
+      gs = pgradient(loss, ps, preparesamples())
+      Flux.Optimise.update!(opt, ps, gs)
+      cb()
+  end
+end
