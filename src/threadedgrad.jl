@@ -15,16 +15,15 @@ function tgradient(loss, ps, preparesamples)
     gs 
 end
     
-
 function _tgradient(loss, ps, preparesamples, nchilds)
     if nchilds == 1
         x = preparesamples()
         return(gradient(() -> loss(x...), ps))
     else 
         i = div(nchilds,2)
-        ref1 = Threads.@spawn _tgradient(loss, ps, preparesamples, i)
         ref2 = Threads.@spawn _tgradient(loss, ps, preparesamples, i)
-        return(addgrad!(fetch(ref1), fetch(ref2), ps))
+        gs1 = _tgradient(loss, ps, preparesamples, i)
+        return(addgrad!(gs1, fetch(ref2), ps))
     end
 end
 
