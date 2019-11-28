@@ -67,8 +67,8 @@ function _pgradient(loss, ps, samples)
     else 
         i = div(length(samples),2)
         ref1 = Threads.@spawn _pgradient(loss, ps, samples[1:i])
-        ref2 = Threads.@spawn _pgradient(loss, ps, samples[i+1:end])
-        return(addgrad!(fetch(ref1), fetch(ref2), ps))
+        gs2 = _pgradient(loss, ps, samples[i+1:end])
+        return(addgrad!(fetch(ref1), gs2, ps))
     end
 end
 
