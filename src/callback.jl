@@ -1,4 +1,4 @@
-function initevalcby(steps; accuracy = () -> (,), resultdir, model)
+function initevalcby(steps; accuracy = () -> (,), resultdir = nothing, model = nothing)
 	i = 0
 	ts = time()
 	history = MVHistory()
@@ -17,7 +17,7 @@ function initevalcby(steps; accuracy = () -> (,), resultdir, model)
 			end
 			push!(history, :time, i, time() - ts)
 			println(i,": loss: ", l, " accuracy: ", acc," time per step: ",round((time() - ts)/steps, sigdigits = 2), "s evaluation time: ", round(evaltime, sigdigits = 2),"s")
-			serialize(resultdir("model_$(i).jls"), model)
+			!isnothing(resultdir) && !isnothing(model) && serialize(resultdir("model_$(i).jls"), model)
 			ts = time()
 		end
 		if 0 < i < 200 && mod(i, 20) == 0
