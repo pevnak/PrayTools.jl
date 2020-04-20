@@ -48,6 +48,7 @@ end
 """
 function ttrain!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby = (y) -> ())
   ps = Flux.Params(ps)
+  cb = Flux.Optimise.runall(cb)
   for i in 1:iterations
       y, gs = tgradient(loss, ps, preparesamples)
       Flux.Optimise.update!(opt, ps, gs)
@@ -83,6 +84,7 @@ end
 """
 function ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> ())
   ps = Flux.Params(ps)
+  cb = Flux.Optimise.runall(cb)
   for i in 1:iterations
       gs = pgradient(loss, ps, preparesamples())
       Flux.Optimise.update!(opt, ps, gs)
