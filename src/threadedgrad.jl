@@ -11,7 +11,7 @@ function tgradient(loss, ps, preparesamples, n = Threads.nthreads())
         isnothing(gs[p]) && continue
         gs[p] ./= n
     end
-    y, gs 
+    y/n, gs 
 end
     
 function _tgradient(loss, ps, preparesamples, nchilds)
