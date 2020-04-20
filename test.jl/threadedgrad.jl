@@ -19,11 +19,11 @@ loss(m, x, y) = Flux.logitcrossentropy(m(x), y)
 gs = Flux.gradient(() -> loss(m, x, y), ps)
 gs1 = tgradient((x...) -> loss(m, x...), ps, () -> (x,y)) 
 
-@test approxgrads(gs, gs1, ps)
+@test approxgrads(gs, gs1[2], ps)
 
 #Let's do some benchmarking
 using BenchmarkTools
-@btime TrainTools.addgrad!(gs, gs1, ps)
+@btime TrainTools.addgrad!(gs, gs1[2], ps)
 # 2.843 μs (8 allocations: 192 bytes)
 
 @btime Flux.gradient(() -> loss(m, x, y), ps)

@@ -1,4 +1,6 @@
-function initevalcby(steps; accuracy = () -> (,), resultdir = nothing, model = nothing)
+using BSON: @save
+
+function initevalcby(; steps =1000, accuracy = () -> () , resultdir = nothing, model = nothing)
 	i = 0
 	ts = time()
 	history = MVHistory()
@@ -8,7 +10,7 @@ function initevalcby(steps; accuracy = () -> (,), resultdir = nothing, model = n
 		y += _y
 		ynorm += 1
 		if mod(i, steps) == 0
-			evaltime = @elapsed acc = accuracy(i)
+			evaltime = @elapsed acc = accuracy()
 			l = y / ynorm
 			y, ynorm = 0.0, 0
 			push!(history, :loss, i, l)
@@ -17,7 +19,7 @@ function initevalcby(steps; accuracy = () -> (,), resultdir = nothing, model = n
 			end
 			push!(history, :time, i, time() - ts)
 			println(i,": loss: ", l, " accuracy: ", acc," time per step: ",round((time() - ts)/steps, sigdigits = 2), "s evaluation time: ", round(evaltime, sigdigits = 2),"s")
-			!isnothing(resultdir) && !isnothing(model) && serialize(resultdir("model_$(i).jls"), model)
+			!isnothing(resultdir) && !isnothing(model) && @save joinpath(resultdir,"model_$(i).bson") model
 			ts = time()
 		end
 		if 0 < i < 200 && mod(i, 20) == 0
