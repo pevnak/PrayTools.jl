@@ -30,3 +30,6 @@ using BenchmarkTools
 # 113.857 μs (4039 allocations: 109.42 KiB)
 @btime tgradient((x...) -> loss(m, x...), ps, () -> (x,y)) 
 # 166.652 μs (16300 allocations: 442.47 KiB)
+
+opt = ADAM()
+ttrain!((x...) -> loss(m, x...), ps, () -> (x,y), opt, 100, cby = y -> println(y))
