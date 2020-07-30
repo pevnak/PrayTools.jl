@@ -59,18 +59,20 @@ end
 
 
 function pgradient(loss, ps, samples::Tuple) 
-    gs = _pgradient(loss, ps, samples)
+    y, gs = _pgradient(loss, ps, samples)
     for p in ps
         isnothing(gs[p]) && continue
         gs[p] ./= length(samples)
     end
-    gs 
+    y/length(samples), gs 
 end
 
 function _pgradient(loss, ps, samples)
     if length(samples) == 1
         x = samples[1]
-        return(gradient(() -> loss(x...), ps))
+        y, back = Zygote.pullback(() -> loss(x...), ps)
+        gs = back(Zygote.sensitivity(y))
+        return(y, gs)
     else 
         i = div(length(samples),2)
         ref1 = Threads.@spawn _pgradient(loss, ps, samples[1:i])
@@ -82,12 +84,43 @@ end
 """
     function ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> ())
 """
-function ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> ())
+function ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby = (y) -> (), debugmode = false)
   ps = Flux.Params(ps)
   cb = Flux.Optimise.runall(cb)
   for i in 1:iterations
-      gs = pgradient(loss, ps, preparesamples())
+        y, gs = pgradient(loss, ps, preparesamples())
+        Flux.Optimise.update!(opt, ps, gs)
+        cb()
+        cby(y)
+  end
+end
+
+global debug_info = nothing
+function ptraind!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby = (y) -> ())
+  global debug_info
+  ps = Flux.Params(ps)
+  cb = Flux.Optimise.runall(cb)
+  maxy = 0
+  for i in 1:iterations
+      ds = preparesamples()
+      debug_info = ds
+      y, gs = pgradient(loss, ps, ds)
+      # if y > maxy
+      #   debug_info = ds
+      #   maxy = y
+      # end
+      # println("y = ", y, gradinfo(gs))
       Flux.Optimise.update!(opt, ps, gs)
       cb()
+      cby(y)
   end
+end
+
+function gradinfo(gs)
+  gs = filter(x -> isa(x, Array),  collect(values(gs.grads)))
+  (nan = mapreduce(x -> sum(isnan.(x)), +,  gs),
+    inf = mapreduce(x -> sum(isinf.(x)), +, gs),
+    max = mapreduce(x -> maximum(abs.(x)), max, gs),
+    l2 = mapreduce(x -> sum(x.^2), +, gs),
+    )
 end

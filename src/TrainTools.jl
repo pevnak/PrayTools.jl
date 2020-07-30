@@ -1,6 +1,7 @@
 module TrainTools
 
 include("threadedgrad.jl")
+include("train.jl")
 include("minibatches.jl")
 include("callback.jl")
 

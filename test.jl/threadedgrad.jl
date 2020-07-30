@@ -23,7 +23,7 @@ gs1 = tgradient((x...) -> loss(m, x...), ps, () -> (x,y))
 
 #Let's do some benchmarking
 using BenchmarkTools
-@btime TrainTools.addgrad!(gs, gs1[2], ps)
+@btime TrainTools.addgrad!(gs, gs1, ps)
 # 2.843 μs (8 allocations: 192 bytes)
 
 @btime Flux.gradient(() -> loss(m, x, y), ps)

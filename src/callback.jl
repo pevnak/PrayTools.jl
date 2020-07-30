@@ -15,7 +15,7 @@ function initevalcby(; steps =1000, accuracy = () -> () , resultdir = nothing, m
 			y, ynorm = 0.0, 0
 			push!(history, :loss, i, l)
 			for k in keys(acc)
-				push!(history, k, i, acc[v])
+				push!(history, k, i, acc[k])
 			end
 			push!(history, :time, i, time() - ts)
 			println(i,": loss: ", l, " accuracy: ", acc," time per step: ",round((time() - ts)/steps, sigdigits = 2), "s evaluation time: ", round(evaltime, sigdigits = 2),"s")
