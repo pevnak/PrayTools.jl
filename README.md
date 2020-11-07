@@ -1,4 +1,6 @@
-# TrainTools.jl
+# PrayTools.jl
+PrayTools.jl are former TrainTools, that I have renamed because someone has created an internal package of the same name and I got afraid of schizophrenia.
+
 A collection of routines to simplify boring stuff around training NNs.
 
 
