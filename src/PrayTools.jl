@@ -1,4 +1,4 @@
-module TrainTools
+module PrayTools
 
 include("threadedgrad.jl")
 include("train.jl")
