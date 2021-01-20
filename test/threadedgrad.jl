@@ -1,4 +1,4 @@
-using TrainTools, Flux, Test
+using PrayTools, Flux, Test
 
 function approxgrads(gs1, gs2, ps)
 	for p in ps 
@@ -23,7 +23,7 @@ gs1 = tgradient((x...) -> loss(m, x...), ps, () -> (x,y))
 
 #Let's do some benchmarking
 using BenchmarkTools
-@btime TrainTools.addgrad!(gs, gs1, ps)
+@btime PrayTools.addgrad!(gs, gs1, ps)
 # 2.843 μs (8 allocations: 192 bytes)
 
 @btime Flux.gradient(() -> loss(m, x, y), ps)

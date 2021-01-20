@@ -1,4 +1,6 @@
-# TrainTools.jl
+# PrayTools.jl
+**PrayTools.jl** are former **TrainTools**, that I had to rename because someone has created an internal package of the same name and I got afraid of schizophrenia. On the end, when I start to train a model, I pray for best results.
+
 A collection of routines to simplify boring stuff around training NNs.
 
 
