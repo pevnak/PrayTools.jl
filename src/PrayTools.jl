@@ -1,6 +1,7 @@
 module PrayTools
 
 include("threadedgrad.jl")
+include("andmask.jl")
 include("train.jl")
 include("minibatches.jl")
 include("callback.jl")
