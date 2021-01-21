@@ -57,7 +57,6 @@ function ttrain!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby =
   end
 end
 
-
 function pgradient(loss, ps, samples::Tuple) 
     y, gs = _pgradient(loss, ps, samples)
     for p in ps
@@ -89,9 +88,8 @@ function dividebatch(bs::Int, xs...)
   tuple(xs...)
 end
 
-
 """
-    function ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> ())
+    function ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> (), bs = Threads.nthreads())
 """
 function ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby = (y) -> (), debugmode = false, bs = Threads.nthreads())
   dataprovider = () ->  dividebatch(bs, preparesamples()...)

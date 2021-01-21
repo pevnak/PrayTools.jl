@@ -5,13 +5,20 @@ using Zygote
 using ValueHistories
 using Statistics
 using ThreadPools
+using LearnBase
+
+include("ffnn.jl")
+export ffnn
 
 include("threadedgrad.jl")
+export tgradient, ttrain!, ptrain!
+
 include("andmask.jl")
 include("train.jl")
+export trainy
 include("minibatches.jl")
 include("callback.jl")
 
-export tgradient, ttrain!, ptrain!, classindexes, initbatchprovider
+export classindexes, initbatchprovider
 
 end # module
