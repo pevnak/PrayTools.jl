@@ -81,29 +81,36 @@ function _pgradient(loss, ps, samples)
     end
 end
 
+function dividebatch(bs::Int, xs...)
+  n = div(nobs(xs), bs)
+  xs = map(Iterators.partition(1:nobs(xs), n)) do i 
+    tuple(map(x -> getobs(x, i), xs)...)
+  end 
+  tuple(xs...)
+end
+
+
 """
     function ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> ())
 """
-function ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby = (y) -> (), debugmode = false)
+function ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby = (y) -> (), debugmode = false, bs = Threads.nthreads())
+  dataprovider = () ->  dividebatch(bs, preparesamples()...)
   ps = Flux.Params(ps)
   cb = Flux.Optimise.runall(cb)
   for i in 1:iterations
-        y, gs = pgradient(loss, ps, preparesamples())
+        y, gs = pgradient(loss, ps, dataprovider())
         Flux.Optimise.update!(opt, ps, gs)
         cb()
         cby(y)
   end
 end
 
-global debug_info = nothing
 function ptraind!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby = (y) -> ())
-  global debug_info
   ps = Flux.Params(ps)
   cb = Flux.Optimise.runall(cb)
   maxy = 0
   for i in 1:iterations
       ds = preparesamples()
-      debug_info = ds
       y, gs = pgradient(loss, ps, ds)
       # if y > maxy
       #   debug_info = ds
