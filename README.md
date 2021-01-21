@@ -1,20 +1,17 @@
 # PrayTools.jl
-**PrayTools.jl** are former **TrainTools**, that I had to rename because someone has created an internal package of the same name and I got afraid of schizophrenia. On the end, when I start to train a model, I pray for best results.
+**PrayTools.jl** are former **TrainTools**, that I had to rename because someone has created an internal package of the same name and I was developing a split personality.
 
-A collection of routines to simplify boring stuff around training NNs.
+**PrayTools.jl** is a collection of routines to simplify boring stuff and my messing around of training NNs, mainly about various versions of distributed training.
 
+### parallel training
+```ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby = (y) ->(), bs = Threads.nthreads())``` and
 
-Currently the main tools are around multi-threaded calculation of gradient. The first function is a variation of a `Flux.train!`, where the data parameter is a function (instead of an iterator) which provides a minibatch for every invokation. ttrain! executes this minibatchprovider in every thread and then calculates a gradient on it. 
+```ttrain!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby = (y) ->())```
+
+performs parallel training assuming that the loss function is additive differing in *where* `preparesamples` is called. In `ptrain!`, a single thread calls `preparesamples` to prepare minibatch, then `dividebatch(bs::Int, xs...)` divides it to `bs` sub-batches, which are then dispatched to a separated thread to calculate gradient. In `ttrain!`, each thread calls `preparesamples` and calculate the gradient immediately. This means that in `ptrain!`, `preparesamples` should return the full minibatch, in `ttrain!` it should return just the sub-batch that would be used by one thread. Both functions use tree-reduction algorithm, such that the complexity of reducing gradients is log(bs). The `iterations` is the number of iterations, after which the loop stops, `cb` is the callback function similar to that of `Flux.train!` and `cby` is a callback taking the output of the loss function as an argument, which is convenient for floating averages.
+
+### PrayTools.initevalcby
+initializes a very simple callback function
 ```
-minibatchprovider() = prepare_minibatch(options)
- ttrain!(loss, ps, minibatchprovider, opt, settings.iterations; cb = () -> ())
-```
-
-
-Alternative is `ptrain` where a `minibatchprovider` is invoked once out of the multithreading. It is assumed that in this case minibatchprovider() returns a tuple of minibatches, and gradient of each minibatch in the tuple is executed on a thread.
-
-Assuming the `prepeare_dataset
-```
-minibatchprovider() = prepare_minibatch(options)
- ttrain!(loss, ps, minibatchprovider, opt, settings.iterations; cb = () -> ())
+cby, history = PrayTools.initevalcby(;accuracy = () -> accuracy(model))
 ```
