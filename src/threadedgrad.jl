@@ -28,20 +28,43 @@ function _tgradient(loss, ps, preparesamples, nchilds)
     end
 end
 
-function addgrad!(gs1, gs2, ps)
-    for p in ps 
-        if gs1[p] != nothing && gs2[p] != nothing 
-            gs1.grads[p] .+= gs2[p]
-        elseif gs2[p] != nothing
-            gs1.grads[p] = gs2[p]
-        end
-    end
-    gs1
+function addgrad!(x::AbstractArray, y::AbstractArray)
+  x .+= y
+  x
 end
 
-function addgrad!(gs1::Tuple, gs2::Tuple, ps)
+function addgrad!(x::NamedTuple, y::NamedTuple)
+  addgrad!!(x, y, keys(x))
+end
+
+function addgrad!!(gs1, gs2, ps)
+  for p in ps 
+      if gs1[p] != nothing && gs2[p] != nothing 
+          addgrad!(gs1[p], gs2[p])
+      elseif gs2[p] != nothing
+          gs1[p] = gs2[p]
+      end
+  end
+  gs1
+end
+
+function addgrad!(gs1::Zygote.Grads, gs2::Zygote.Grads, ps::Zygote.Params)
+  addgrad!!(gs1, gs2, ps)
+end
+
+function addgrad!(gs1::Tuple{T,Zygote.Grads}, gs2::Tuple{T,Zygote.Grads}, ps::Zygote.Params) where {T}
     (gs1[1] + gs2[1], addgrad!(gs1[2], gs2[2], ps))
 end
+
+function normalize!(gs, ps, n::Int)
+  for p in ps
+      isnothing(gs[p]) && continue
+      normalize!(gs[p], n)
+  end
+end
+
+normalize!(x::AbstractArray, n) = x ./= n
+normalize!(x::NamedTuple, n) = normalize!(x, keys(x), n)
 
 """
     function ttrain!(loss, ps, preparesamples, opt, iterations; cb = () -> ())
@@ -59,11 +82,9 @@ end
 
 function pgradient(loss, ps, samples::Tuple) 
     y, gs = _pgradient(loss, ps, samples)
-    for p in ps
-        isnothing(gs[p]) && continue
-        gs[p] ./= length(samples)
-    end
-    y/length(samples), gs 
+    n = length(samples)
+    normalize!(gs, ps, n)
+    y/n, gs 
 end
 
 function _pgradient(loss, ps, samples)
@@ -80,10 +101,15 @@ function _pgradient(loss, ps, samples)
     end
 end
 
+"""
+  dividebatch(bs::Int, xs...)
+
+  divide minibatch `xs` into `bs` chunks of similar size
+"""
 function dividebatch(bs::Int, xs...)
   n = div(nobs(xs), bs)
   xs = map(Iterators.partition(1:nobs(xs), n)) do i 
-    tuple(map(x -> getobs(x, i), xs)...)
+    tuple(map(x -> LearnBase.getobs(x, i), xs)...)
   end 
   tuple(xs...)
 end
