@@ -16,6 +16,7 @@ classindexes(targets::PooledArray) = classindexes(Vector(targets))
 
 function StatsBase.sample(class_indices::Dict, n::Int)
 	n = div(n, length(keys(class_indices)))
+	n = min(n, minimum(length(v) for v in values(class_indices)))
 	ii = [sample(class_indices[k], n, replace = false) for k in keys(class_indices)]
 	ii = vcat(ii...);
 end
@@ -25,7 +26,7 @@ function makebatch(data::AbstractMatrix, targets, target_set, class_indices, n)
 	data[:, ii], Flux.onehotbatch(targets[ii], target_set)
 end
 
-function makebatch(data::AbstractVector, targets, target_set, class_indices, n)
+function makebatch(data, targets, target_set, class_indices, n)
 	ii = sample(class_indices, n)
 	data[ii], Flux.onehotbatch(targets[ii], target_set)
 end
