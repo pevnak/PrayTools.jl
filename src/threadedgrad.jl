@@ -33,8 +33,15 @@ function addgrad!(x::AbstractArray, y::AbstractArray)
   x
 end
 
-function addgrad!(x::NamedTuple, y::NamedTuple)
-  addgrad!!(x, y, keys(x))
+function addgrad!(gs1::NamedTuple, gs2::NamedTuple)
+  for p in keys(x)
+    if gs1[p] != nothing && gs2[p] != nothing 
+        addgrad!(gs1[p], gs2[p])
+    else
+      error("cannot joint two NamedTuples with non-equal keys")
+    end
+  end
+  gs1
 end
 
 function addgrad!!(gs1, gs2, ps)
@@ -42,14 +49,21 @@ function addgrad!!(gs1, gs2, ps)
       if gs1[p] != nothing && gs2[p] != nothing 
           addgrad!(gs1[p], gs2[p])
       elseif gs2[p] != nothing
-          gs1[p] = gs2[p]
+          gs1[p].grads = gs2[p]
       end
   end
   gs1
 end
 
 function addgrad!(gs1::Zygote.Grads, gs2::Zygote.Grads, ps::Zygote.Params)
-  addgrad!!(gs1, gs2, ps)
+  for p in ps 
+      if gs1[p] != nothing && gs2[p] != nothing 
+          addgrad!(gs1[p], gs2[p])
+      elseif gs2[p] != nothing
+          gs1[p].grads = gs2[p]
+      end
+  end
+  gs1
 end
 
 function addgrad!(gs1::Tuple{T,Zygote.Grads}, gs2::Tuple{T,Zygote.Grads}, ps::Zygote.Params) where {T}
