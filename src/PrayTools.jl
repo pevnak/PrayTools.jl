@@ -10,6 +10,10 @@ using LearnBase
 include("ffnn.jl")
 export ffnn
 
+include("backgroundloader.jl")
+export BackgroundDataLoader
+
+include("addgrads.jl")
 include("threadedgrad.jl")
 export tgradient, ttrain!, ptrain!
 

@@ -31,3 +31,35 @@ function initevalcby(; steps =1000, accuracy = () -> () , resultdir = nothing, m
 	end
 	cby, history
 end
+
+# function throttle(cb; steps = typemax(Int), t = typemax(Int))
+# 	steps != typemax(Int) && return(throttle_steps(cb, steps = 1000))
+# 	t != typemax(Int) && return(throttle_steps(cb, steps = 1000))
+# end
+
+function throttle_steps(cb, steps = 1000)
+	i = 0
+	() -> begin
+		i += 1
+		if mod(i, steps) == 0
+			cb()
+		end
+	end
+end
+
+
+function bestmodelselector(model, accuracy; showaccuracy::Bool = false)
+	best_accuracy = 0.0
+	best_model = Ref{Any}(model)
+
+	cb = PrayTools.throttle_steps() do 
+		acc = accuracy()
+		showaccuracy && println("accuracy = ",acc)
+		if acc > best_accuracy
+			best_accuracy = acc
+			best_model[] = deepcopy(model)
+			println("improved best model ", acc)
+		end
+	end
+	cb, best_model
+end
