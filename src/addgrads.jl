@@ -15,7 +15,7 @@ function addgrad!(gs1::NamedTuple, gs2::NamedTuple)
   gs1
 end
 
-function addgrad!!(gsq1, gs2, ps)
+function addgrad!(gs1, gs2, ps)
   for p in ps 
       if gs1[p] != nothing && gs2[p] != nothing 
           addgrad!(gs1[p], gs2[p])
