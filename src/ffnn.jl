@@ -1,11 +1,14 @@
 """
 	ffnn(idim, nneurons, nlayers, fun, bnfun = nothing)
+	ffnn(idim, nneurons, nlayers, fun; last_linear = false)
+
 	creates a feedforward neural network with 
 	`idim` --- input dimention
 	`nlayers` --- layers, 
 	`nneurons` --- hidden dimension,
 	`fun` --- transfer functions,
 	`bnfun` --- batch normalization (default to `nothing` meaning disabled)
+
 
 ```juliadoc
 
@@ -30,3 +33,18 @@ function ffnn(idim, nneurons, nlayers, fun, bnfun, dr)
 	end
 	Chain(c...)
 end
+
+
+function ffnn(idim, nneurons, nlayers, fun; last_linear = false)
+	layers = []
+	for i in 1:nlayers
+		if nlayers == i && last_linear
+			push!(layers, Dense(idim, nneurons))
+		else
+			push!(layers, Dense(idim, nneurons, fun))
+		end
+		idim = nneurons
+	end
+	length(layers) > 1 ? Chain(layers...) : layers[1]
+end
+

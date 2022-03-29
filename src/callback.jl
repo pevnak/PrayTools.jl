@@ -5,6 +5,7 @@ function initevalcby(; steps =1000, accuracy = () -> () , resultdir = nothing, m
 	ts = time()
 	history = MVHistory()
 	y, ynorm = 0.0, 0
+	resultdir !== nothing && !isdir(resultdir) && mkpath(resultdir)
 	cby = function evalcb(_y)
 		i += 1
 		y += _y
@@ -36,23 +37,32 @@ end
 # 	steps != typemax(Int) && return(throttle_steps(cb, steps = 1000))
 # 	t != typemax(Int) && return(throttle_steps(cb, steps = 1000))
 # end
+"""
+	throttle_steps(;cb = () -> (), cbs = (_) -> (), steps = 1000 )
 
-function throttle_steps(cb, steps = 1000)
+	throttle the callback function `cb` (no argument) and `cbs` 
+	(iteration number as an argument) 
+"""
+function throttle_steps(;cb = () -> (), cbs = (_) -> (), steps = 1000 )
 	i = 0
 	() -> begin
 		i += 1
 		if mod(i, steps) == 0
 			cb()
+			cbs(i)
 		end
 	end
 end
 
-
+"""
+	bestmodelselector(model, accuracy; showaccuracy::Bool = false)
+	
+"""
 function bestmodelselector(model, accuracy; showaccuracy::Bool = false)
 	best_accuracy = 0.0
 	best_model = Ref{Any}(model)
 
-	cb = PrayTools.throttle_steps() do 
+	cb = () -> begin  
 		acc = accuracy()
 		showaccuracy && println("accuracy = ",acc)
 		if acc > best_accuracy
@@ -61,5 +71,5 @@ function bestmodelselector(model, accuracy; showaccuracy::Bool = false)
 			println("improved best model ", acc)
 		end
 	end
-	cb, best_model
+	throttle_steps(;cb), best_model
 end

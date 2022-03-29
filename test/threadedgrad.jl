@@ -7,7 +7,7 @@ function approxgrads(gs1, gs2, ps)
 	return(true)
 end
 
-l, d = 100, 4 
+l, d = 100, 10 
 l = div(l, 2)
 m = Chain(Dense(d,d,relu), Dense(d,2))
 x = randn(d,2*l)
