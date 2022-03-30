@@ -1,5 +1,10 @@
 using BSON: @save
 
+"""
+	cby, history = initevalcby(; steps =1000, accuracy = () -> () , resultdir = nothing, model = nothing)
+
+	
+"""
 function initevalcby(; steps =1000, accuracy = () -> () , resultdir = nothing, model = nothing)
 	i = 0
 	ts = time()
@@ -31,27 +36,6 @@ function initevalcby(; steps =1000, accuracy = () -> () , resultdir = nothing, m
 		end
 	end
 	cby, history
-end
-
-# function throttle(cb; steps = typemax(Int), t = typemax(Int))
-# 	steps != typemax(Int) && return(throttle_steps(cb, steps = 1000))
-# 	t != typemax(Int) && return(throttle_steps(cb, steps = 1000))
-# end
-"""
-	throttle_steps(;cb = () -> (), cbs = (_) -> (), steps = 1000 )
-
-	throttle the callback function `cb` (no argument) and `cbs` 
-	(iteration number as an argument) 
-"""
-function throttle_steps(;cb = () -> (), cbs = (_) -> (), steps = 1000 )
-	i = 0
-	() -> begin
-		i += 1
-		if mod(i, steps) == 0
-			cb()
-			cbs(i)
-		end
-	end
 end
 
 """

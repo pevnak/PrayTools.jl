@@ -45,6 +45,7 @@ end
 function pgradient(loss, ps, samples::Tuple) 
     y, gs = _pgradient(loss, ps, samples)
     n = length(samples)
+    n == 1 && return(y, gs)
     normalize!(gs, ps, n)
     y/n, gs 
 end
@@ -61,45 +62,4 @@ function _pgradient(loss, ps, samples)
         gs2 = _pgradient(loss, ps, samples[i+1:end])
         return(addgrad!(fetch(ref1), gs2, ps))
     end
-end
-
-"""
-  dividebatch(bs::Int, xs...)
-
-  divide minibatch `xs` into `bs` chunks of similar size
-"""
-function dividebatch(bs::Int, xs...)
-  n = div(nobs(xs), bs)
-  xs = map(Iterators.partition(1:nobs(xs), n)) do i 
-    tuple(map(x -> LearnBase.getobs(x, i), xs)...)
-  end 
-  tuple(xs...)
-end
-
-"""
-    function ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> (), bs = Threads.nthreads())
-"""
-function ptrain!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby = (y) -> (), debugmode = false, bs = Threads.nthreads())
-  dataprovider = () ->  dividebatch(bs, preparesamples()...)
-  ps = Flux.Params(ps)
-  cb = Flux.Optimise.runall(cb)
-  for i in 1:iterations
-        y, gs = pgradient(loss, ps, dataprovider())
-        Flux.Optimise.update!(opt, ps, gs)
-        cb()
-        cby(y)
-  end
-end
-
-function ptraind!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby = (y) -> ())
-  ps = Flux.Params(ps)
-  cb = Flux.Optimise.runall(cb)
-  maxy = 0
-  for i in 1:iterations
-      ds = preparesamples()
-      y, gs = pgradient(loss, ps, ds)
-      Flux.Optimise.update!(opt, ps, gs)
-      cb()
-      cby(y)
-  end
 end
