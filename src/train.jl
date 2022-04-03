@@ -1,5 +1,5 @@
 """
-    train1!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby = (y) -> ())
+    train!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby = (y) -> ())
 """
 function train!(loss, ps, preparesamples, opt, iterations; cb = () -> (), cby = (y) -> ())
   ps = Flux.Params(ps)
@@ -57,13 +57,13 @@ function dividebatch(bs::Int, xs...)
 end
 
 """
-  paralelization_stats(loss, ps, prepare_minibatch, minibatch_size; steps = 10)
+  paralelization_stats(loss, ps, prepare_minibatch, minibatch_size; steps , try_parts)
 
   loss --- implicitly contains the `model` and should accepts as an arguments outputs of `prepare_minibatch`
   prepare_minibatch --- should accept as input a `minibatch_size` and the number of items to which it should be partitioned
 """
-function paralelization_stats(loss, ps, prepare_minibatch, minibatch_size; steps = 10)
-  perfs = map(0:round(Int,log(minibatch_size)/log(2))) do sc
+function paralelization_stats(loss, ps, prepare_minibatch, minibatch_size; steps = 10, try_parts = 0:round(Int,log(minibatch_size)/log(2)))
+  perfs = map(try_parts) do sc
     parts = 2^sc
     dss = prepare_minibatch(minibatch_size, parts)
     PrayTools.pgradient(loss, ps, dss)

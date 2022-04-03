@@ -19,7 +19,7 @@ export tgradient, ttrain!, ptrain!
 
 include("andmask.jl")
 include("train.jl")
-export trainy
+export autotrain!, ptrain!
 include("minibatches.jl")
 include("callback.jl")
 export initevalcby
