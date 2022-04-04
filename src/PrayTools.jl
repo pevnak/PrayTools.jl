@@ -5,6 +5,7 @@ using Zygote
 using ValueHistories
 using Statistics
 using ThreadPools
+using DataFrames
 using LearnBase
 
 include("ffnn.jl")
