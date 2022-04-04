@@ -66,10 +66,10 @@ function paralelization_stats(loss, ps, prepare_minibatch, minibatch_size; steps
   perfs = map(try_parts) do sc
     parts = 2^sc
     dss = prepare_minibatch(minibatch_size, parts)
-    PrayTools.pgradient(loss, ps, dss)
+    pgradient(loss, ps, dss)
     t = @elapsed for i in 1:steps
       dss = prepare_minibatch(minibatch_size, parts)
-      PrayTools.pgradient(loss, ps, dss)
+      pgradient(loss, ps, dss)
     end
     @show (;parts, time = t)
     (;parts, time = t)
