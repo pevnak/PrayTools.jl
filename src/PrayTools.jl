@@ -7,6 +7,7 @@ using Statistics
 using ThreadPools
 using DataFrames
 using LearnBase
+using Serialization
 
 include("ffnn.jl")
 export ffnn
