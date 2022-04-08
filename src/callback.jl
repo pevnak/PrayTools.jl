@@ -27,7 +27,7 @@ function initevalcby(; steps =1000, accuracy = () -> () , resultdir = nothing, m
 			println(i,": loss: ", l, " accuracy: ", acc," time per step: ",round((time() - ts)/steps, sigdigits = 2), "s evaluation time: ", round(evaltime, sigdigits = 2),"s")
 			# !isnothing(resultdir) && !isnothing(model) && @save joinpath(resultdir,"model_$(i).bson") model
 			!isnothing(resultdir) && !isnothing(model) && serialize(joinpath(resultdir,"model_$(i).jls"), model)
-			!isnothing(resultdir) &&  serialize(joinpath(resultdir,"history_$(i).jls"), history)
+			!isnothing(resultdir) &&  serialize(joinpath(resultdir,"history.jls"), history)
 			ts = time()
 		end
 		if 0 < i < 200 && mod(i, 20) == 0

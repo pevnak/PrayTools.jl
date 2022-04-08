@@ -1,7 +1,7 @@
 name = "PrayTools"
 uuid = "083a1e89-a1cc-483a-bb5e-ca7e64a602e0"
 authors = ["Pevnak <pevnak@gmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
